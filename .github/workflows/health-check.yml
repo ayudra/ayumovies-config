@@ -1,0 +1,50 @@
+name: "Ayumovies Autonomous Health Scout"
+
+on:
+  schedule:
+    # Run twice daily (every 12 hours at 00:00 and 12:00 UTC)
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:
+    # Allows manual one-click trigger from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scout:
+    name: "Probe Servers & Self-Heal"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: "Set up Python 3.11"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: "Install dependencies"
+        run: pip install requests
+
+      - name: "Execute Health Scout Probe"
+        run: python scout.py
+
+      - name: "Commit & Push changes if updated"
+        run: |
+          if [ -f scout_result.txt ] && grep -q "CHANGED=true" scout_result.txt; then
+            echo "Changes detected in sources.json. Committing..."
+            rm -f scout_result.txt
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add sources.json standby_pool.json
+            git commit -m "Auto-Heal: sources.json updated by Scout bot [skip ci]"
+            git push origin main
+
+            echo "Purging jsDelivr edge cache..."
+            curl -s https://purge.jsdelivr.net/gh/${{ github.repository }}@main/sources.json || true
+          else
+            echo "All active servers healthy. No commit required."
+            rm -f scout_result.txt
+          fi
