@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "updated": "2026-11-07",
+  "movie_servers": [
+    {
+      "id": "vidsrc_su",
+      "name": "VidSrc Ultra",
+      "badge": "Fast 4K",
+      "desc": "High-Speed Cloud Stream",
+      "domain": "vidsrc.su",
+      "enabled": true,
+      "required_id": "imdb",
+      "url_movie": "https://vidsrc.su/embed/movie/{id}",
+      "url_tv": "https://vidsrc.su/embed/tv/{id}/{season}/{episode}"
+    },
+    {
+      "id": "vidlink",
+      "name": "VidLink",
+      "badge": "Watch Together",
+      "desc": "Real-Time Sync Player",
+      "domain": "vidlink.pro",
+      "enabled": true,
+      "required_id": "tmdb",
+      "url_movie": "https://vidlink.pro/movie/{id}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true",
+      "url_tv": "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true"
+    },
+    {
+      "id": "hexa",
+      "name": "Hexa Stream",
+      "badge": "Multi-Audio",
+      "desc": "Global Stream Cluster",
+      "domain": "hexa.su",
+      "enabled": true,
+      "required_id": "tmdb",
+      "url_movie": "https://hexa.su/watch/movie/{id}",
+      "url_tv": "https://hexa.su/watch/tv/{id}/{season}/{episode}"
+    },
+    {
+      "id": "anyembed",
+      "name": "AnyEmbed",
+      "badge": "HLS Mirror",
+      "desc": "Direct HLS Backup Stream",
+      "domain": "anyembed.xyz",
+      "enabled": true,
+      "required_id": "tmdb",
+      "url_movie": "https://anyembed.xyz/embed/tmdb-movie-{id}",
+      "url_tv": "https://anyembed.xyz/embed/tmdb-tv-{id}/{season}/{episode}"
+    }
+  ],
+  "anime_servers": [
+    {
+      "id": "anixo",
+      "name": "AniXo",
+      "badge": "Sub & Dub",
+      "desc": "Ultra-Fast Anime Stream Engine",
+      "domain": "anixo.buzz",
+      "enabled": true,
+      "required_id": "anilist",
+      "has_dub": true,
+      "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?color=%2306b6d4"
+    },
+    {
+      "id": "megavid",
+      "name": "MegaVid",
+      "badge": "Sub & Dub",
+      "desc": "KissKH High-Definition Anime Engine",
+      "domain": "megavid.buzz",
+      "enabled": true,
+      "required_id": "anilist",
+      "has_dub": true,
+      "url": "https://megavid.buzz/ani/{id}/{episode}/{lang}?color=%2306b6d4&autoplay=true"
+    },
+    {
+      "id": "animeembed",
+      "name": "AnimeStream",
+      "badge": "Sub & Dub",
+      "desc": "Dual-Audio HLS Player with Captions",
+      "domain": "animeembed.com",
+      "enabled": true,
+      "required_id": "anilist",
+      "has_dub": true,
+      "url": "https://animeembed.com/embed/ani/{id}/{episode}?language={lang}&accent=06b6d4&autoplay=1"
+    },
+    {
+      "id": "megaplay",
+      "name": "MegaPlay",
+      "badge": "Sub & Dub",
+      "desc": "Multi-Source Anime Cluster",
+      "domain": "megaplay.buzz",
+      "enabled": true,
+      "required_id": "anilist",
+      "has_dub": true,
+      "url": "https://megaplay.buzz/stream/ani/{id}/{episode}/{lang}"
+    }
+  ],
+  "ad_whitelist": [
+    "vidsrc.su",
+    "vidlink.pro",
+    "hexa.su",
+    "anyembed.xyz",
+    "anixo.buzz",
+    "megavid.buzz",
+    "animeembed.com",
+    "megaplay.buzz",
+    "2embed",
+    "vidsrc",
+    "videm.buzz",
+    "videasy",
+    "anikoto"
+  ],
+  "deprecated_servers": [
+    "autoembed",
+    "direct",
+    "2embed",
+    "vidsrc_pm",
+    "vidsrc",
+    "vidsrc_buzz",
+    "videasy"
+  ]
+}
