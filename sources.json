@@ -1,7 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "updated": "2026-11-07",
   "movie_servers": [
+    {
+      "id": "vidlink",
+      "name": "VidLink",
+      "badge": "Ultra Fast",
+      "desc": "Real-Time High-Speed Stream",
+      "domain": "vidlink.pro",
+      "enabled": true,
+      "required_id": "tmdb",
+      "url_movie": "https://vidlink.pro/movie/{id}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true",
+      "url_tv": "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true"
+    },
     {
       "id": "vidsrc_su",
       "name": "VidSrc Ultra",
@@ -12,17 +23,6 @@
       "required_id": "imdb",
       "url_movie": "https://vidsrc.su/embed/movie/{id}",
       "url_tv": "https://vidsrc.su/embed/tv/{id}/{season}/{episode}"
-    },
-    {
-      "id": "vidlink",
-      "name": "VidLink",
-      "badge": "Watch Together",
-      "desc": "Real-Time Sync Player",
-      "domain": "vidlink.pro",
-      "enabled": true,
-      "required_id": "tmdb",
-      "url_movie": "https://vidlink.pro/movie/{id}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true",
-      "url_tv": "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true"
     },
     {
       "id": "hexa",
@@ -94,19 +94,19 @@
     }
   ],
   "ad_whitelist": [
-    "vidsrc.su",
-    "vidlink.pro",
-    "hexa.su",
-    "anyembed.xyz",
-    "anixo.buzz",
-    "megavid.buzz",
-    "animeembed.com",
-    "megaplay.buzz",
     "2embed",
-    "vidsrc",
-    "videm.buzz",
+    "anikoto",
+    "animeembed.com",
+    "anixo.buzz",
+    "anyembed.xyz",
+    "hexa.su",
+    "megaplay.buzz",
+    "megavid.buzz",
     "videasy",
-    "anikoto"
+    "videm.buzz",
+    "vidlink.pro",
+    "vidsrc",
+    "vidsrc.su"
   ],
   "deprecated_servers": [
     "autoembed",
