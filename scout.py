@@ -47,18 +47,22 @@ DEFAULT_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
     "Sec-Fetch-Dest": "iframe",
     "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "cross-site"
+    "Sec-Fetch-Site": "cross-site",
+    "Referer": "https://google.com/"
 }
 
 def format_probe_url(server, is_anime=False):
     req_id = server.get("required_id", "tmdb")
     if is_anime:
         template = server.get("url", "")
-        chosen_id = BENCHMARK["anime"]["anilist"]
+        chosen_id = BENCHMARK["anime"]["anilist"] if req_id == "anilist" else (BENCHMARK["tv"]["tmdb"] if req_id == "tmdb" else BENCHMARK["tv"]["imdb"])
         ep = BENCHMARK["anime"]["episode"]
         lang = BENCHMARK["anime"]["lang"]
         return template.replace("{id}", chosen_id)\
-                       .replace("{anilist_id}", chosen_id)\
+                       .replace("{anilist_id}", BENCHMARK["anime"]["anilist"])\
+                       .replace("{tmdb_id}", BENCHMARK["tv"]["tmdb"])\
+                       .replace("{imdb_id}", BENCHMARK["tv"]["imdb"])\
+                       .replace("{season}", "1")\
                        .replace("{episode}", ep)\
                        .replace("{ep}", ep)\
                        .replace("{lang}", lang)

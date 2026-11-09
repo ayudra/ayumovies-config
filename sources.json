@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "updated": "2026-11-09",
   "movie_servers": [
     {
@@ -68,12 +68,12 @@
       "enabled": true,
       "required_id": "anilist",
       "has_dub": true,
-      "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?color=%2306b6d4"
+      "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?track={lang}&color=%2306b6d4"
     },
     {
       "id": "megavid",
       "name": "MegaVid",
-      "badge": "Sub & Dub",
+      "badge": "Dub & Sub",
       "desc": "KissKH High-Definition Anime Engine",
       "domain": "megavid.buzz",
       "enabled": true,
@@ -82,35 +82,33 @@
       "url": "https://megavid.buzz/ani/{id}/{episode}/{lang}?color=%2306b6d4&autoplay=true"
     },
     {
-      "id": "animeembed",
-      "name": "AnimeStream",
-      "badge": "Sub & Dub",
-      "desc": "Dual-Audio HLS Player with Captions",
-      "domain": "animeembed.com",
+      "id": "primesrc_anime",
+      "name": "PrimeSrc Anime",
+      "badge": "Multi-Source",
+      "desc": "Multi-Cluster Engine (Filemoon/Voe)",
+      "domain": "primesrc.me",
       "enabled": true,
-      "required_id": "anilist",
-      "has_dub": true,
-      "url": "https://animeembed.com/embed/ani/{id}/{episode}?language={lang}&accent=06b6d4&autoplay=1"
+      "required_id": "tmdb",
+      "has_dub": false,
+      "url": "https://primesrc.me/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}"
     },
     {
-      "id": "megaplay",
-      "name": "MegaPlay",
-      "badge": "Sub & Dub",
-      "desc": "Multi-Source Anime Cluster",
-      "domain": "megaplay.buzz",
+      "id": "vidsrc_anime",
+      "name": "VidSrc Anime",
+      "badge": "Vidstack HD",
+      "desc": "Clean 0-Ad Global Anime Mirror",
+      "domain": "vidsrc.pm",
       "enabled": true,
-      "required_id": "anilist",
-      "has_dub": true,
-      "url": "https://megaplay.buzz/stream/ani/{id}/{episode}/{lang}"
+      "required_id": "tmdb",
+      "has_dub": false,
+      "url": "https://vidsrc.pm/embed/tv/{tmdb_id}/{season}/{episode}"
     }
   ],
   "ad_whitelist": [
     "2embed",
     "anikoto",
-    "animeembed.com",
     "anixo.buzz",
     "filemoon.sx",
-    "megaplay.buzz",
     "megavid.buzz",
     "primesrc.me",
     "streamtape.com",
@@ -125,6 +123,8 @@
     "www.2embed.cc"
   ],
   "deprecated_servers": [
+    "animeembed",
+    "megaplay",
     "hexa",
     "anyembed",
     "autoembed",
