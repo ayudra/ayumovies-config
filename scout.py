@@ -91,21 +91,46 @@ def probe_endpoint(server, is_anime=False):
             if not any(bad in final_domain for bad in ["cloudflare", "parking", "domain-for-sale", "adsterra", "google"]):
                 migrated_domain = final_domain
 
-        # Healthy if HTTP 200 and has valid player content
-        if resp.status_code == 200:
-            bad_indicators = ["profiton-domain-verification", "domain-for-sale", "cloudflare-challenge", "pwa/icon-192.png"]
-            text_lower = resp.text.lower()
-            if any(b in text_lower for b in bad_indicators):
-                return False, migrated_domain, "Detected ad-wall or non-embeddable page"
-
-            if len(resp.content) > 150:
-                return True, migrated_domain, f"HTTP 200 OK ({len(resp.content)} bytes)"
-            else:
-                return False, migrated_domain, f"Response too short ({len(resp.content)} bytes)"
-        elif resp.status_code in [301, 302, 307, 308]:
-            return True, migrated_domain, f"HTTP Redirect ({resp.status_code})"
-        else:
+        if resp.status_code != 200:
+            if resp.status_code in [301, 302, 307, 308]:
+                return True, migrated_domain, f"HTTP Redirect ({resp.status_code})"
             return False, migrated_domain, f"HTTP {resp.status_code}"
+
+        # 1. Header checks for iframe embedding
+        csp = (resp.headers.get("Content-Security-Policy") or "").lower()
+        if "frame-ancestors 'none'" in csp or "frame-ancestors 'self'" in csp:
+            return False, migrated_domain, f"CSP frame-ancestors blocks iframe ({csp[:40]}...)"
+
+        xfo = (resp.headers.get("X-Frame-Options") or "").upper()
+        if xfo in ["DENY", "SAMEORIGIN"]:
+            return False, migrated_domain, f"X-Frame-Options blocks iframe ({xfo})"
+
+        # 2. Content Semantic Verification
+        text_lower = resp.text.lower()
+        bad_indicators = [
+            "<title>error",
+            "oops! something went wrong",
+            "the page you're looking for doesn't exist",
+            "error - megaplay",
+            "error-container",
+            "profiton-domain-verification",
+            "cloudflare-challenge",
+            "pwa/icon-192.png",
+            "apple-mobile-web-app-title",
+            "unauthorized embed domain",
+            '"error":"not found"',
+            '"error": "not found"',
+            "domain for sale",
+            "this domain is parked"
+        ]
+        for bad in bad_indicators:
+            if bad in text_lower:
+                return False, migrated_domain, f"Dead/Ad-wall signature detected: '{bad}'"
+
+        if len(resp.content) < 500:
+            return False, migrated_domain, f"Response too short ({len(resp.content)} bytes)"
+
+        return True, migrated_domain, f"HTTP 200 OK ({len(resp.content)} bytes, verified embed)"
 
     except requests.exceptions.Timeout:
         return False, None, "Connection timeout (>9s)"
@@ -168,9 +193,10 @@ def run_scout():
         else:
             fc = srv.get("fail_count", 0) + 1
             srv["fail_count"] = fc
-            if fc >= 2 and srv.get("enabled") is not False:
+            is_hard_fail = any(k in reason for k in ["Dead/Ad-wall", "CSP", "X-Frame-Options", "HTTP 404", "HTTP 410"])
+            if (fc >= 2 or is_hard_fail) and srv.get("enabled") is not False:
                 srv["enabled"] = False
-                print(f"    ⚠️ Server marked DISABLED after {fc} failures: {name}")
+                print(f"    ⚠️ Server marked DISABLED ({reason}): {name}")
                 changed = True
 
     # 2. Probe Anime Servers
@@ -199,9 +225,10 @@ def run_scout():
         else:
             fc = srv.get("fail_count", 0) + 1
             srv["fail_count"] = fc
-            if fc >= 2 and srv.get("enabled") is not False:
+            is_hard_fail = any(k in reason for k in ["Dead/Ad-wall", "CSP", "X-Frame-Options", "HTTP 404", "HTTP 410"])
+            if (fc >= 2 or is_hard_fail) and srv.get("enabled") is not False:
                 srv["enabled"] = False
-                print(f"    ⚠️ Server marked DISABLED after {fc} failures: {name}")
+                print(f"    ⚠️ Server marked DISABLED ({reason}): {name}")
                 changed = True
 
     # 3. Check Capacity & Auto-Promote Standby Servers if Needed

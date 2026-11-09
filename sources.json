@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "updated": "2026-11-09",
   "movie_servers": [
     {
@@ -11,7 +11,8 @@
       "enabled": true,
       "required_id": "tmdb",
       "url_movie": "https://vidlink.pro/movie/{id}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true",
-      "url_tv": "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true"
+      "url_tv": "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true",
+      "fail_count": 0
     },
     {
       "id": "vidsrc_su",
@@ -22,7 +23,8 @@
       "enabled": true,
       "required_id": "imdb",
       "url_movie": "https://vidsrc.su/embed/movie/{id}",
-      "url_tv": "https://vidsrc.su/embed/tv/{id}/{season}/{episode}"
+      "url_tv": "https://vidsrc.su/embed/tv/{id}/{season}/{episode}",
+      "fail_count": 0
     },
     {
       "id": "vidsrc_pm",
@@ -33,7 +35,8 @@
       "enabled": true,
       "required_id": "imdb",
       "url_movie": "https://vidsrc.pm/embed/movie/{id}",
-      "url_tv": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}"
+      "url_tv": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}",
+      "fail_count": 0
     },
     {
       "id": "primesrc",
@@ -44,7 +47,8 @@
       "enabled": true,
       "required_id": "tmdb",
       "url_movie": "https://primesrc.me/embed/movie?tmdb={id}",
-      "url_tv": "https://primesrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}"
+      "url_tv": "https://primesrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}",
+      "fail_count": 0
     },
     {
       "id": "twoembed",
@@ -55,7 +59,8 @@
       "enabled": true,
       "required_id": "imdb",
       "url_movie": "https://www.2embed.cc/embed/{id}",
-      "url_tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}"
+      "url_tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}",
+      "fail_count": 0
     }
   ],
   "anime_servers": [
@@ -68,7 +73,8 @@
       "enabled": true,
       "required_id": "anilist",
       "has_dub": true,
-      "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?track={lang}&color=%2306b6d4"
+      "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?track={lang}&color=%2306b6d4",
+      "fail_count": 0
     },
     {
       "id": "megavid",
@@ -79,7 +85,8 @@
       "enabled": true,
       "required_id": "anilist",
       "has_dub": true,
-      "url": "https://megavid.buzz/ani/{id}/{episode}/{lang}?color=%2306b6d4&autoplay=true"
+      "url": "https://megavid.buzz/ani/{id}/{episode}/{lang}?color=%2306b6d4&autoplay=true",
+      "fail_count": 0
     },
     {
       "id": "primesrc_anime",
@@ -90,7 +97,8 @@
       "enabled": true,
       "required_id": "tmdb",
       "has_dub": false,
-      "url": "https://primesrc.me/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}"
+      "url": "https://primesrc.me/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}",
+      "fail_count": 0
     },
     {
       "id": "vidsrc_anime",
@@ -101,7 +109,8 @@
       "enabled": true,
       "required_id": "tmdb",
       "has_dub": false,
-      "url": "https://vidsrc.pm/embed/tv/{tmdb_id}/{season}/{episode}"
+      "url": "https://vidsrc.pm/embed/tv/{tmdb_id}/{season}/{episode}",
+      "fail_count": 0
     }
   ],
   "ad_whitelist": [
