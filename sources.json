@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated": "2026-11-07",
+  "version": 3,
+  "updated": "2026-11-09",
   "movie_servers": [
     {
       "id": "vidlink",
@@ -25,26 +25,37 @@
       "url_tv": "https://vidsrc.su/embed/tv/{id}/{season}/{episode}"
     },
     {
-      "id": "hexa",
-      "name": "Hexa Stream",
-      "badge": "Multi-Audio",
-      "desc": "Global Stream Cluster",
-      "domain": "hexa.su",
+      "id": "vidsrc_pm",
+      "name": "VidSrc Prime",
+      "badge": "Vidstack HD",
+      "desc": "Clean 0-Ad Global Stream",
+      "domain": "vidsrc.pm",
       "enabled": true,
-      "required_id": "tmdb",
-      "url_movie": "https://hexa.su/watch/movie/{id}",
-      "url_tv": "https://hexa.su/watch/tv/{id}/{season}/{episode}"
+      "required_id": "imdb",
+      "url_movie": "https://vidsrc.pm/embed/movie/{id}",
+      "url_tv": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}"
     },
     {
-      "id": "anyembed",
-      "name": "AnyEmbed",
-      "badge": "HLS Mirror",
-      "desc": "Direct HLS Backup Stream",
-      "domain": "anyembed.xyz",
+      "id": "primesrc",
+      "name": "PrimeSrc",
+      "badge": "Multi-Source",
+      "desc": "Multi-Cluster Engine (Filemoon/Voe)",
+      "domain": "primesrc.me",
       "enabled": true,
       "required_id": "tmdb",
-      "url_movie": "https://anyembed.xyz/embed/tmdb-movie-{id}",
-      "url_tv": "https://anyembed.xyz/embed/tmdb-tv-{id}/{season}/{episode}"
+      "url_movie": "https://primesrc.me/embed/movie?tmdb={id}",
+      "url_tv": "https://primesrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}"
+    },
+    {
+      "id": "twoembed",
+      "name": "2Embed Pro",
+      "badge": "Backup",
+      "desc": "Global Failover Mirror",
+      "domain": "www.2embed.cc",
+      "enabled": true,
+      "required_id": "imdb",
+      "url_movie": "https://www.2embed.cc/embed/{id}",
+      "url_tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}"
     }
   ],
   "anime_servers": [
@@ -98,21 +109,27 @@
     "anikoto",
     "animeembed.com",
     "anixo.buzz",
-    "anyembed.xyz",
-    "hexa.su",
+    "filemoon.sx",
     "megaplay.buzz",
     "megavid.buzz",
+    "primesrc.me",
+    "streamtape.com",
     "videasy",
     "videm.buzz",
     "vidlink.pro",
+    "vidmoly.to",
     "vidsrc",
-    "vidsrc.su"
+    "vidsrc.pm",
+    "vidsrc.su",
+    "voe.sx",
+    "www.2embed.cc"
   ],
   "deprecated_servers": [
+    "hexa",
+    "anyembed",
     "autoembed",
     "direct",
     "2embed",
-    "vidsrc_pm",
     "vidsrc",
     "vidsrc_buzz",
     "videasy"

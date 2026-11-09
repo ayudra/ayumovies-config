@@ -1,39 +1,17 @@
 {
-  "version": 1,
-  "updated": "2026-11-07",
+  "version": 2,
+  "updated": "2026-11-09",
   "movie_servers": [
     {
-      "id": "vidsrc_pm",
-      "name": "VidSrc PM",
-      "badge": "1080p Mirror",
-      "desc": "Official VidSrc Network Cluster",
-      "domain": "vidsrc.pm",
+      "id": "vidsrc_to",
+      "name": "VidSrc TO",
+      "badge": "HD Cloud",
+      "desc": "VidSrc High-Definition Backup Stream",
+      "domain": "vidsrc.to",
       "enabled": true,
       "required_id": "imdb",
-      "url_movie": "https://vidsrc.pm/embed/movie/{id}",
-      "url_tv": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}"
-    },
-    {
-      "id": "2embed_cc",
-      "name": "2Embed Mirror",
-      "badge": "Multi-Server",
-      "desc": "Global High-Speed Player Backup",
-      "domain": "www.2embed.cc",
-      "enabled": true,
-      "required_id": "imdb",
-      "url_movie": "https://www.2embed.cc/embed/{id}",
-      "url_tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}"
-    },
-    {
-      "id": "superembed",
-      "name": "SuperEmbed",
-      "badge": "Global Mirror",
-      "desc": "High Definition Multi-Audio Mirror",
-      "domain": "multiembed.mov",
-      "enabled": true,
-      "required_id": "imdb",
-      "url_movie": "https://multiembed.mov/?video_id={id}",
-      "url_tv": "https://multiembed.mov/?video_id={id}&s={season}&e={episode}"
+      "url_movie": "https://vidsrc.to/embed/movie/{id}",
+      "url_tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}"
     }
   ],
   "anime_servers": [
@@ -47,17 +25,6 @@
       "required_id": "anilist",
       "has_dub": true,
       "url": "https://anikoto.cc/embed/ani/{id}/{episode}/{lang}"
-    },
-    {
-      "id": "vidsrc_anime",
-      "name": "VidSrc Anime",
-      "badge": "Sub & Dub",
-      "desc": "VidSrc Anime Franchise Stream",
-      "domain": "vidsrc.pm",
-      "enabled": true,
-      "required_id": "imdb",
-      "has_dub": false,
-      "url": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}"
     }
   ]
 }

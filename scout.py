@@ -89,6 +89,11 @@ def probe_endpoint(server, is_anime=False):
 
         # Healthy if HTTP 200 and has valid player content
         if resp.status_code == 200:
+            bad_indicators = ["profiton-domain-verification", "domain-for-sale", "cloudflare-challenge", "pwa/icon-192.png"]
+            text_lower = resp.text.lower()
+            if any(b in text_lower for b in bad_indicators):
+                return False, migrated_domain, "Detected ad-wall or non-embeddable page"
+
             if len(resp.content) > 150:
                 return True, migrated_domain, f"HTTP 200 OK ({len(resp.content)} bytes)"
             else:
@@ -200,12 +205,14 @@ def run_scout():
     active_movies = [s for s in sources.get("movie_servers", []) if s.get("enabled") is not False]
     active_anime = [s for s in sources.get("anime_servers", []) if s.get("enabled") is not False]
 
-    target_movie_count = 4
+    target_movie_count = 5
     if len(active_movies) < target_movie_count:
         needed = target_movie_count - len(active_movies)
         print(f"  Movie servers below target capacity ({len(active_movies)}/{target_movie_count}). Seeking {needed} standby...")
         for candidate in standby.get("movie_servers", []):
             if any(s.get("id") == candidate.get("id") for s in sources["movie_servers"]):
+                continue
+            if candidate.get("id") in sources.get("deprecated_servers", []):
                 continue
             ok, _, _ = probe_endpoint(candidate, is_anime=False)
             if ok:
