@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "updated": "2026-11-09",
+  "version": 6,
+  "updated": "2026-11-12",
   "movie_servers": [
     {
       "id": "vidlink",
@@ -32,11 +32,11 @@
       "badge": "Vidstack HD",
       "desc": "Clean 0-Ad Global Stream",
       "domain": "vidsrc.pm",
-      "enabled": true,
+      "enabled": false,
       "required_id": "imdb",
       "url_movie": "https://vidsrc.pm/embed/movie/{id}",
       "url_tv": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}",
-      "fail_count": 0
+      "fail_count": 1
     },
     {
       "id": "primesrc",
@@ -48,7 +48,7 @@
       "required_id": "tmdb",
       "url_movie": "https://primesrc.me/embed/movie?tmdb={id}",
       "url_tv": "https://primesrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}",
-      "fail_count": 0
+      "fail_count": 1
     },
     {
       "id": "twoembed",
@@ -61,6 +61,17 @@
       "url_movie": "https://www.2embed.cc/embed/{id}",
       "url_tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}",
       "fail_count": 0
+    },
+    {
+      "id": "vidsrc_to",
+      "name": "VidSrc TO",
+      "badge": "HD Cloud",
+      "desc": "VidSrc High-Definition Backup Stream",
+      "domain": "vidsrc.to",
+      "enabled": true,
+      "required_id": "imdb",
+      "url_movie": "https://vidsrc.to/embed/movie/{id}",
+      "url_tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}"
     }
   ],
   "anime_servers": [
@@ -74,7 +85,7 @@
       "required_id": "anilist",
       "has_dub": true,
       "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?track={lang}&color=%2306b6d4",
-      "fail_count": 0
+      "fail_count": 1
     },
     {
       "id": "megavid",
@@ -98,7 +109,7 @@
       "required_id": "tmdb",
       "has_dub": false,
       "url": "https://primesrc.me/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}",
-      "fail_count": 0
+      "fail_count": 1
     },
     {
       "id": "vidsrc_anime",
@@ -106,11 +117,11 @@
       "badge": "Vidstack HD",
       "desc": "Clean 0-Ad Global Anime Mirror",
       "domain": "vidsrc.pm",
-      "enabled": true,
+      "enabled": false,
       "required_id": "tmdb",
       "has_dub": false,
       "url": "https://vidsrc.pm/embed/tv/{tmdb_id}/{season}/{episode}",
-      "fail_count": 0
+      "fail_count": 1
     }
   ],
   "ad_whitelist": [
@@ -128,6 +139,7 @@
     "vidsrc",
     "vidsrc.pm",
     "vidsrc.su",
+    "vidsrc.to",
     "voe.sx",
     "www.2embed.cc"
   ],
