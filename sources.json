@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "updated": "2026-11-12",
+  "version": 7,
+  "updated": "2026-11-13",
   "movie_servers": [
     {
       "id": "vidlink",
@@ -36,7 +36,7 @@
       "required_id": "imdb",
       "url_movie": "https://vidsrc.pm/embed/movie/{id}",
       "url_tv": "https://vidsrc.pm/embed/tv/{id}/{season}/{episode}",
-      "fail_count": 1
+      "fail_count": 2
     },
     {
       "id": "primesrc",
@@ -44,11 +44,11 @@
       "badge": "Multi-Source",
       "desc": "Multi-Cluster Engine (Filemoon/Voe)",
       "domain": "primesrc.me",
-      "enabled": true,
+      "enabled": false,
       "required_id": "tmdb",
       "url_movie": "https://primesrc.me/embed/movie?tmdb={id}",
       "url_tv": "https://primesrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}",
-      "fail_count": 1
+      "fail_count": 2
     },
     {
       "id": "twoembed",
@@ -71,7 +71,8 @@
       "enabled": true,
       "required_id": "imdb",
       "url_movie": "https://vidsrc.to/embed/movie/{id}",
-      "url_tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}"
+      "url_tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}",
+      "fail_count": 0
     }
   ],
   "anime_servers": [
@@ -81,11 +82,11 @@
       "badge": "Sub & Dub",
       "desc": "Ultra-Fast Anime Stream Engine",
       "domain": "anixo.buzz",
-      "enabled": true,
+      "enabled": false,
       "required_id": "anilist",
       "has_dub": true,
       "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?track={lang}&color=%2306b6d4",
-      "fail_count": 1
+      "fail_count": 2
     },
     {
       "id": "megavid",
@@ -105,11 +106,11 @@
       "badge": "Multi-Source",
       "desc": "Multi-Cluster Engine (Filemoon/Voe)",
       "domain": "primesrc.me",
-      "enabled": true,
+      "enabled": false,
       "required_id": "tmdb",
       "has_dub": false,
       "url": "https://primesrc.me/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}",
-      "fail_count": 1
+      "fail_count": 2
     },
     {
       "id": "vidsrc_anime",
@@ -121,7 +122,7 @@
       "required_id": "tmdb",
       "has_dub": false,
       "url": "https://vidsrc.pm/embed/tv/{tmdb_id}/{season}/{episode}",
-      "fail_count": 1
+      "fail_count": 2
     }
   ],
   "ad_whitelist": [
