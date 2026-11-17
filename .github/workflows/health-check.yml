@@ -31,6 +31,11 @@ jobs:
       - name: "Execute Health Scout Probe"
         run: python scout.py
 
+      # Gate: never publish a manifest the apps cannot parse. A scout bug that
+      # writes malformed JSON would otherwise reach every installed client.
+      - name: "Validate manifest"
+        run: python validate_manifest.py
+
       - name: "Commit & Push changes if updated"
         run: |
           if [ -f scout_result.txt ] && grep -q "CHANGED=true" scout_result.txt; then

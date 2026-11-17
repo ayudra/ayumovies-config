@@ -1,19 +1,7 @@
 {
-  "version": 2,
-  "updated": "2026-11-09",
-  "movie_servers": [
-    {
-      "id": "vidsrc_to",
-      "name": "VidSrc TO",
-      "badge": "HD Cloud",
-      "desc": "VidSrc High-Definition Backup Stream",
-      "domain": "vidsrc.to",
-      "enabled": true,
-      "required_id": "imdb",
-      "url_movie": "https://vidsrc.to/embed/movie/{id}",
-      "url_tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}"
-    }
-  ],
+  "version": 3,
+  "updated": "2026-11-17",
+  "movie_servers": [],
   "anime_servers": [
     {
       "id": "anikoto",
