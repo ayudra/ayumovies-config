@@ -91,9 +91,10 @@ def probe_endpoint(server, is_anime=False):
             if not any(bad in final_domain for bad in ["cloudflare", "parking", "domain-for-sale", "adsterra", "google"]):
                 migrated_domain = final_domain
 
+        # `allow_redirects=True` already followed 3xx responses, so anything
+        # still non-200 here is a genuine failure (the old redirect branch was
+        # unreachable).
         if resp.status_code != 200:
-            if resp.status_code in [301, 302, 307, 308]:
-                return True, migrated_domain, f"HTTP Redirect ({resp.status_code})"
             return False, migrated_domain, f"HTTP {resp.status_code}"
 
         # 1. Header checks for iframe embedding
@@ -139,7 +140,16 @@ def probe_endpoint(server, is_anime=False):
     except Exception as ex:
         return False, None, f"Probe error: {ex}"
 
-def run_scout():
+def normalize_server_id(server_id):
+    """Compare ids ignoring separators/case so `2embed` matches `twoembed` and
+    `vidsrc.su` matches `vidsrc_su` (the manifest mixes both spellings)."""
+    raw = str(server_id or "").lower().replace("_", "").replace("-", "").replace(".", "")
+    if raw == "2embed":
+        return "twoembed"
+    return raw
+
+
+def run_scout(dry_run=False):
     config_path = os.path.join(os.path.dirname(__file__), "sources.json")
     standby_path = os.path.join(os.path.dirname(__file__), "standby_pool.json")
 
@@ -241,9 +251,11 @@ def run_scout():
         needed = target_movie_count - len(active_movies)
         print(f"  Movie servers below target capacity ({len(active_movies)}/{target_movie_count}). Seeking {needed} standby...")
         for candidate in standby.get("movie_servers", []):
-            if any(s.get("id") == candidate.get("id") for s in sources["movie_servers"]):
+            existing_ids = {normalize_server_id(s.get("id")) for s in sources["movie_servers"]}
+            deprecated_ids = {normalize_server_id(d) for d in sources.get("deprecated_servers", [])}
+            if normalize_server_id(candidate.get("id")) in existing_ids:
                 continue
-            if candidate.get("id") in sources.get("deprecated_servers", []):
+            if normalize_server_id(candidate.get("id")) in deprecated_ids:
                 continue
             ok, _, _ = probe_endpoint(candidate, is_anime=False)
             if ok:
@@ -260,7 +272,8 @@ def run_scout():
         needed = target_anime_count - len(active_anime)
         print(f"  Anime servers below target capacity ({len(active_anime)}/{target_anime_count}). Seeking {needed} standby...")
         for candidate in standby.get("anime_servers", []):
-            if any(s.get("id") == candidate.get("id") for s in sources["anime_servers"]):
+            existing_anime_ids = {normalize_server_id(s.get("id")) for s in sources["anime_servers"]}
+            if normalize_server_id(candidate.get("id")) in existing_anime_ids:
                 continue
             ok, _, _ = probe_endpoint(candidate, is_anime=True)
             if ok:
@@ -280,6 +293,10 @@ def run_scout():
         sources["version"] = old_ver + 1
         sources["updated"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
 
+        if dry_run:
+            print("\n[DRY RUN] Manifest would be bumped to version", sources["version"], "- nothing written.")
+            return
+
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(sources, f, indent=2)
 
@@ -298,4 +315,4 @@ def run_scout():
             rf.write("CHANGED=false\n")
 
 if __name__ == "__main__":
-    run_scout()
+    run_scout(dry_run="--dry-run" in sys.argv)
