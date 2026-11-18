@@ -115,6 +115,21 @@ def probe_endpoint(server, is_anime=False):
     CSP/X-Frame-Options, 404/410, ad-wall page). Soft failures (timeouts, 5xx,
     network errors) are retried across runs before a server is disabled.
     """
+    if server.get("direct_cdn"):
+        probe_url = server.get("url_probe") or f"https://{server.get('domain', 'api6.aoneroom.com')}/wefeed-mobile-bff/user-api/visitor-login"
+        headers = dict(DEFAULT_HEADERS)
+        headers["Origin"] = "https://app.ayuwatch.local"
+        headers["Access-Control-Request-Method"] = "POST"
+        try:
+            started = time.time()
+            resp = requests.options(probe_url, headers=headers, timeout=9)
+            latency_ms = int((time.time() - started) * 1000)
+            if resp.status_code == 200:
+                return True, None, "Verified Direct CDN Cluster Reachable", latency_ms, False
+            return False, None, f"HTTP {resp.status_code}", latency_ms, False
+        except Exception as e:
+            return False, None, f"Connection error: {str(e)[:40]}", 0, False
+
     probe_url = format_probe_url(server, is_anime)
     if not probe_url:
         return False, None, "No URL template defined", 0, True
