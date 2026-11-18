@@ -12,8 +12,10 @@ Runs via GitHub Actions on a 12-hour schedule.
 """
 
 import os
+import re
 import sys
 import json
+import time
 import datetime
 from urllib.parse import urlparse, quote
 
@@ -51,6 +53,39 @@ DEFAULT_HEADERS = {
     "Referer": "https://google.com/"
 }
 
+# Transient failures (timeout / 5xx / network) need this many consecutive runs
+# before a server is disabled, so a Cloudflare hiccup does not bench a good mirror.
+SOFT_FAIL_LIMIT = 3
+
+STREAM_HINT_RE = re.compile(r'https?://[^\s"\'<>]+?\.m3u8[^\s"\'<>]*', re.IGNORECASE)
+
+
+def probe_stream_hint(html_text, headers=None):
+    """Advisory second stage: if the embed already contains an HLS URL, ask it.
+
+    This never affects the health verdict. The probe runs from a datacenter IP,
+    where CDNs routinely answer 403 (or drop the connection) even though the
+    mirror plays fine in a real browser, so a failed hint would bench healthy
+    servers. Pages that build the stream URL in JavaScript report None.
+    """
+    if not html_text:
+        return None
+    match = STREAM_HINT_RE.search(html_text)
+    if not match:
+        return None
+    hint_url = match.group(0).replace('\\/', '/')
+    try:
+        resp = requests.head(hint_url, headers=headers or DEFAULT_HEADERS, timeout=6, allow_redirects=True)
+        if resp.status_code >= 400:
+            resp = requests.get(hint_url, headers=headers or DEFAULT_HEADERS, timeout=6, stream=True)
+            resp.close()
+        if resp.status_code >= 400:
+            return f"stream hint unverified (HTTP {resp.status_code}, advisory)"
+        return "stream hint reachable"
+    except Exception:
+        return None
+
+
 def format_probe_url(server, is_anime=False):
     req_id = server.get("required_id", "tmdb")
     if is_anime:
@@ -74,14 +109,37 @@ def format_probe_url(server, is_anime=False):
                        .replace("{imdb_id}", BENCHMARK["movie"]["imdb"])
 
 def probe_endpoint(server, is_anime=False):
+    """Returns (ok, migrated_domain, reason, latency_ms, hard_fail).
+
+    `hard_fail` marks problems that will not fix themselves (iframe blocked by
+    CSP/X-Frame-Options, 404/410, ad-wall page). Soft failures (timeouts, 5xx,
+    network errors) are retried across runs before a server is disabled.
+    """
+    if server.get("direct_cdn"):
+        probe_url = server.get("url_probe") or f"https://{server.get('domain', 'api6.aoneroom.com')}/wefeed-mobile-bff/user-api/visitor-login"
+        headers = dict(DEFAULT_HEADERS)
+        headers["Origin"] = "https://app.ayuwatch.local"
+        headers["Access-Control-Request-Method"] = "POST"
+        try:
+            started = time.time()
+            resp = requests.options(probe_url, headers=headers, timeout=9)
+            latency_ms = int((time.time() - started) * 1000)
+            if resp.status_code == 200:
+                return True, None, "Verified Direct CDN Cluster Reachable", latency_ms, False
+            return False, None, f"HTTP {resp.status_code}", latency_ms, False
+        except Exception as e:
+            return False, None, f"Connection error: {str(e)[:40]}", 0, False
+
     probe_url = format_probe_url(server, is_anime)
     if not probe_url:
-        return False, None, "No URL template defined"
+        return False, None, "No URL template defined", 0, True
 
     orig_domain = server.get("domain", "").lower()
 
     try:
+        started = time.time()
         resp = requests.get(probe_url, headers=DEFAULT_HEADERS, timeout=9, allow_redirects=True)
+        latency_ms = int((time.time() - started) * 1000)
         final_domain = urlparse(resp.url).netloc.lower()
 
         # Check for 301/302 domain migration
@@ -91,19 +149,21 @@ def probe_endpoint(server, is_anime=False):
             if not any(bad in final_domain for bad in ["cloudflare", "parking", "domain-for-sale", "adsterra", "google"]):
                 migrated_domain = final_domain
 
+        # `allow_redirects=True` already followed 3xx responses, so anything
+        # still non-200 here is a genuine failure (the old redirect branch was
+        # unreachable).
         if resp.status_code != 200:
-            if resp.status_code in [301, 302, 307, 308]:
-                return True, migrated_domain, f"HTTP Redirect ({resp.status_code})"
-            return False, migrated_domain, f"HTTP {resp.status_code}"
+            hard = resp.status_code in (404, 410)
+            return False, migrated_domain, f"HTTP {resp.status_code}", latency_ms, hard
 
         # 1. Header checks for iframe embedding
         csp = (resp.headers.get("Content-Security-Policy") or "").lower()
         if "frame-ancestors 'none'" in csp or "frame-ancestors 'self'" in csp:
-            return False, migrated_domain, f"CSP frame-ancestors blocks iframe ({csp[:40]}...)"
+            return False, migrated_domain, f"CSP frame-ancestors blocks iframe ({csp[:40]}...)", latency_ms, True
 
         xfo = (resp.headers.get("X-Frame-Options") or "").upper()
         if xfo in ["DENY", "SAMEORIGIN"]:
-            return False, migrated_domain, f"X-Frame-Options blocks iframe ({xfo})"
+            return False, migrated_domain, f"X-Frame-Options blocks iframe ({xfo})", latency_ms, True
 
         # 2. Content Semantic Verification
         text_lower = resp.text.lower()
@@ -125,21 +185,32 @@ def probe_endpoint(server, is_anime=False):
         ]
         for bad in bad_indicators:
             if bad in text_lower:
-                return False, migrated_domain, f"Dead/Ad-wall signature detected: '{bad}'"
+                return False, migrated_domain, f"Dead/Ad-wall signature detected: '{bad}'", latency_ms, True
 
         if len(resp.content) < 500:
-            return False, migrated_domain, f"Response too short ({len(resp.content)} bytes)"
+            return False, migrated_domain, f"Response too short ({len(resp.content)} bytes)", latency_ms, False
 
-        return True, migrated_domain, f"HTTP 200 OK ({len(resp.content)} bytes, verified embed)"
+        hint = probe_stream_hint(resp.text)
+        suffix = f", {hint}" if hint else ""
+        return True, migrated_domain, f"HTTP 200 OK ({len(resp.content)} bytes, verified embed{suffix})", latency_ms, False
 
     except requests.exceptions.Timeout:
-        return False, None, "Connection timeout (>9s)"
+        return False, None, "Connection timeout (>9s)", 0, False
     except requests.exceptions.SSLError as ssl_err:
-        return False, None, f"SSL Error: {ssl_err}"
+        return False, None, f"SSL Error: {ssl_err}", 0, False
     except Exception as ex:
-        return False, None, f"Probe error: {ex}"
+        return False, None, f"Probe error: {ex}", 0, False
 
-def run_scout():
+def normalize_server_id(server_id):
+    """Compare ids ignoring separators/case so `2embed` matches `twoembed` and
+    `vidsrc.su` matches `vidsrc_su` (the manifest mixes both spellings)."""
+    raw = str(server_id or "").lower().replace("_", "").replace("-", "").replace(".", "")
+    if raw == "2embed":
+        return "twoembed"
+    return raw
+
+
+def run_scout(dry_run=False):
     config_path = os.path.join(os.path.dirname(__file__), "sources.json")
     standby_path = os.path.join(os.path.dirname(__file__), "standby_pool.json")
 
@@ -166,11 +237,12 @@ def run_scout():
     whitelist = set(sources.get("ad_whitelist", []))
 
     # 1. Probe Movie & TV Servers
+    probe_failures = 0
     print("\n[1/3] Probing Movie/TV Servers...")
     for srv in sources.get("movie_servers", []):
         sid = srv.get("id")
         name = srv.get("name")
-        ok, new_domain, reason = probe_endpoint(srv, is_anime=False)
+        ok, new_domain, reason, latency_ms, hard_fail = probe_endpoint(srv, is_anime=False)
         print(f"  • {name} ({srv.get('domain')}): {'✅ HEALTHY' if ok else '❌ FAIL'} - {reason}")
 
         if new_domain:
@@ -184,27 +256,49 @@ def run_scout():
             whitelist.add(new_domain)
             changed = True
 
+        now_iso = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        srv["last_checked"] = now_iso
+        if latency_ms:
+            srv["latency_ms"] = latency_ms
+        prev_fail_count = srv.get("fail_count", 0) or 0
+
         if ok:
             srv["fail_count"] = 0
+            srv["last_ok"] = now_iso
+            if prev_fail_count:
+                # Persist the reset. Without this the counter silently restarts
+                # at 0 every run and a flapping server is never benched.
+                changed = True
             if srv.get("enabled") is False:
                 srv["enabled"] = True
                 print(f"    ⚡ Server recovered, re-enabled: {name}")
                 changed = True
         else:
-            fc = srv.get("fail_count", 0) + 1
+            if srv.get("enabled") is False:
+                # Already benched: re-counting it would bump the manifest version
+                # on every run forever. Recovery is still detected above.
+                print("      already disabled - not re-counting this run")
+                continue
+            probe_failures += 1
+            fc = prev_fail_count + 1
             srv["fail_count"] = fc
-            is_hard_fail = any(k in reason for k in ["Dead/Ad-wall", "CSP", "X-Frame-Options", "HTTP 404", "HTTP 410"])
-            if (fc >= 2 or is_hard_fail) and srv.get("enabled") is not False:
+            # Deterministic problems disable immediately; transient ones must fail
+            # SOFT_FAIL_LIMIT runs in a row before the mirror is benched.
+            should_disable = hard_fail or fc >= SOFT_FAIL_LIMIT
+            print(f"      fail_count={fc} hard_fail={hard_fail} -> {'disable' if should_disable else 'keep enabled (transient)'}")
+            # Persist the incremented counter, otherwise SOFT_FAIL_LIMIT could
+            # never be reached across runs.
+            changed = True
+            if should_disable and srv.get("enabled") is not False:
                 srv["enabled"] = False
                 print(f"    ⚠️ Server marked DISABLED ({reason}): {name}")
-                changed = True
 
     # 2. Probe Anime Servers
     print("\n[2/3] Probing Anime Servers...")
     for srv in sources.get("anime_servers", []):
         sid = srv.get("id")
         name = srv.get("name")
-        ok, new_domain, reason = probe_endpoint(srv, is_anime=True)
+        ok, new_domain, reason, latency_ms, hard_fail = probe_endpoint(srv, is_anime=True)
         print(f"  • {name} ({srv.get('domain')}): {'✅ HEALTHY' if ok else '❌ FAIL'} - {reason}")
 
         if new_domain:
@@ -216,20 +310,42 @@ def run_scout():
             whitelist.add(new_domain)
             changed = True
 
+        now_iso = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        srv["last_checked"] = now_iso
+        if latency_ms:
+            srv["latency_ms"] = latency_ms
+        prev_fail_count = srv.get("fail_count", 0) or 0
+
         if ok:
             srv["fail_count"] = 0
+            srv["last_ok"] = now_iso
+            if prev_fail_count:
+                # Persist the reset. Without this the counter silently restarts
+                # at 0 every run and a flapping server is never benched.
+                changed = True
             if srv.get("enabled") is False:
                 srv["enabled"] = True
                 print(f"    ⚡ Server recovered, re-enabled: {name}")
                 changed = True
         else:
-            fc = srv.get("fail_count", 0) + 1
+            if srv.get("enabled") is False:
+                # Already benched: re-counting it would bump the manifest version
+                # on every run forever. Recovery is still detected above.
+                print("      already disabled - not re-counting this run")
+                continue
+            probe_failures += 1
+            fc = prev_fail_count + 1
             srv["fail_count"] = fc
-            is_hard_fail = any(k in reason for k in ["Dead/Ad-wall", "CSP", "X-Frame-Options", "HTTP 404", "HTTP 410"])
-            if (fc >= 2 or is_hard_fail) and srv.get("enabled") is not False:
+            # Deterministic problems disable immediately; transient ones must fail
+            # SOFT_FAIL_LIMIT runs in a row before the mirror is benched.
+            should_disable = hard_fail or fc >= SOFT_FAIL_LIMIT
+            print(f"      fail_count={fc} hard_fail={hard_fail} -> {'disable' if should_disable else 'keep enabled (transient)'}")
+            # Persist the incremented counter, otherwise SOFT_FAIL_LIMIT could
+            # never be reached across runs.
+            changed = True
+            if should_disable and srv.get("enabled") is not False:
                 srv["enabled"] = False
                 print(f"    ⚠️ Server marked DISABLED ({reason}): {name}")
-                changed = True
 
     # 3. Check Capacity & Auto-Promote Standby Servers if Needed
     print("\n[3/3] Checking Server Fleet Capacity...")
@@ -241,11 +357,13 @@ def run_scout():
         needed = target_movie_count - len(active_movies)
         print(f"  Movie servers below target capacity ({len(active_movies)}/{target_movie_count}). Seeking {needed} standby...")
         for candidate in standby.get("movie_servers", []):
-            if any(s.get("id") == candidate.get("id") for s in sources["movie_servers"]):
+            existing_ids = {normalize_server_id(s.get("id")) for s in sources["movie_servers"]}
+            deprecated_ids = {normalize_server_id(d) for d in sources.get("deprecated_servers", [])}
+            if normalize_server_id(candidate.get("id")) in existing_ids:
                 continue
-            if candidate.get("id") in sources.get("deprecated_servers", []):
+            if normalize_server_id(candidate.get("id")) in deprecated_ids:
                 continue
-            ok, _, _ = probe_endpoint(candidate, is_anime=False)
+            ok, _, _, _, _ = probe_endpoint(candidate, is_anime=False)
             if ok:
                 sources["movie_servers"].append(candidate)
                 whitelist.add(candidate.get("domain"))
@@ -260,9 +378,10 @@ def run_scout():
         needed = target_anime_count - len(active_anime)
         print(f"  Anime servers below target capacity ({len(active_anime)}/{target_anime_count}). Seeking {needed} standby...")
         for candidate in standby.get("anime_servers", []):
-            if any(s.get("id") == candidate.get("id") for s in sources["anime_servers"]):
+            existing_anime_ids = {normalize_server_id(s.get("id")) for s in sources["anime_servers"]}
+            if normalize_server_id(candidate.get("id")) in existing_anime_ids:
                 continue
-            ok, _, _ = probe_endpoint(candidate, is_anime=True)
+            ok, _, _, _, _ = probe_endpoint(candidate, is_anime=True)
             if ok:
                 sources["anime_servers"].append(candidate)
                 whitelist.add(candidate.get("domain"))
@@ -272,6 +391,15 @@ def run_scout():
                 if needed <= 0:
                     break
 
+    still_low_movies = [s for s in sources.get("movie_servers", []) if s.get("enabled") is not False]
+    still_low_anime = [s for s in sources.get("anime_servers", []) if s.get("enabled") is not False]
+    if len(still_low_movies) < target_movie_count:
+        print(f"  ⚠️ STANDBY POOL EXHAUSTED: {len(still_low_movies)}/{target_movie_count} movie servers "
+              f"and no promotable mirror left. Add candidates to standby_pool.json.")
+    if len(still_low_anime) < target_anime_count:
+        print(f"  ⚠️ STANDBY POOL EXHAUSTED: {len(still_low_anime)}/{target_anime_count} anime servers "
+              f"and no promotable mirror left. Add candidates to standby_pool.json.")
+
     sources["ad_whitelist"] = sorted(list(whitelist))
 
     # 4. Save and Bump Version If Changes Occurred
@@ -279,6 +407,10 @@ def run_scout():
         old_ver = sources.get("version", 1)
         sources["version"] = old_ver + 1
         sources["updated"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+
+        if dry_run:
+            print("\n[DRY RUN] Manifest would be bumped to version", sources["version"], "- nothing written.")
+            return
 
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(sources, f, indent=2)
@@ -292,10 +424,13 @@ def run_scout():
             rf.write("CHANGED=true\n")
     else:
         print("\n" + "=" * 65)
-        print(" ✅ ALL SERVERS HEALTHY: No manifest updates required.")
+        if probe_failures:
+            print(f" ⚠️ {probe_failures} probe failure(s) seen, no manifest change required.")
+        else:
+            print(" ✅ ALL SERVERS HEALTHY: No manifest updates required.")
         print("=" * 65)
         with open("scout_result.txt", "w") as rf:
             rf.write("CHANGED=false\n")
 
 if __name__ == "__main__":
-    run_scout()
+    run_scout(dry_run="--dry-run" in sys.argv)

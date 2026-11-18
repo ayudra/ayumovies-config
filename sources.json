@@ -1,7 +1,21 @@
 {
-  "version": 10,
+  "version": 11,
   "updated": "2026-11-18",
   "movie_servers": [
+    {
+      "id": "moviebox",
+      "name": "MovieBox",
+      "badge": "Multi-Audio",
+      "desc": "Direct High-Speed CDN with Hindi/English/Regional Dubs",
+      "domain": "api6.aoneroom.com",
+      "enabled": true,
+      "direct_cdn": true,
+      "has_dub": true,
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:03Z",
+      "latency_ms": 766,
+      "last_ok": "2026-11-18T09:21:03Z"
+    },
     {
       "id": "vidlink",
       "name": "VidLink",
@@ -12,7 +26,10 @@
       "required_id": "tmdb",
       "url_movie": "https://vidlink.pro/movie/{id}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true&player=jw",
       "url_tv": "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=ffffff&secondaryColor=18181b&iconColor=ffffff&autoplay=true&player=jw",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:04Z",
+      "latency_ms": 1136,
+      "last_ok": "2026-11-18T09:21:04Z"
     },
     {
       "id": "vidsrc_su",
@@ -24,7 +41,10 @@
       "required_id": "imdb",
       "url_movie": "https://vidsrc.su/embed/movie/{id}",
       "url_tv": "https://vidsrc.su/embed/tv/{id}/{season}/{episode}",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:05Z",
+      "latency_ms": 1119,
+      "last_ok": "2026-11-18T09:21:05Z"
     },
     {
       "id": "vidsrc_pm",
@@ -36,7 +56,10 @@
       "required_id": "imdb",
       "url_movie": "https://vidprime.top/embed/movie/{id}",
       "url_tv": "https://vidprime.top/embed/tv/{id}/{season}/{episode}",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:06Z",
+      "latency_ms": 1217,
+      "last_ok": "2026-11-18T09:21:06Z"
     },
     {
       "id": "primesrc",
@@ -44,11 +67,14 @@
       "badge": "Multi-Source",
       "desc": "Multi-Cluster Engine (Filemoon/Voe)",
       "domain": "primesrc.me",
-      "enabled": false,
+      "enabled": true,
       "required_id": "tmdb",
       "url_movie": "https://primesrc.me/embed/movie?tmdb={id}",
       "url_tv": "https://primesrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}",
-      "fail_count": 2
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:07Z",
+      "latency_ms": 815,
+      "last_ok": "2026-11-18T09:21:07Z"
     },
     {
       "id": "twoembed",
@@ -60,7 +86,10 @@
       "required_id": "imdb",
       "url_movie": "https://www.2embed.cc/embed/{id}",
       "url_tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:08Z",
+      "latency_ms": 1417,
+      "last_ok": "2026-11-18T09:21:08Z"
     },
     {
       "id": "vidsrc_to",
@@ -72,21 +101,41 @@
       "required_id": "imdb",
       "url_movie": "https://vidsrc.to/embed/movie/{id}",
       "url_tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:09Z",
+      "latency_ms": 727,
+      "last_ok": "2026-11-18T09:21:09Z"
     }
   ],
   "anime_servers": [
+    {
+      "id": "moviebox",
+      "name": "MovieBox Anime",
+      "badge": "Multi-Audio",
+      "desc": "Direct CDN Anime with Dubs & High-Speed Streams",
+      "domain": "api6.aoneroom.com",
+      "enabled": true,
+      "direct_cdn": true,
+      "has_dub": true,
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:10Z",
+      "latency_ms": 815,
+      "last_ok": "2026-11-18T09:21:10Z"
+    },
     {
       "id": "anixo",
       "name": "AniXo",
       "badge": "Sub & Dub",
       "desc": "Ultra-Fast Anime Stream Engine",
       "domain": "anixo.buzz",
-      "enabled": false,
+      "enabled": true,
       "required_id": "anilist",
       "has_dub": true,
       "url": "https://anixo.buzz/embed/ani/{id}/{episode}/{lang}?track={lang}&color=%2306b6d4",
-      "fail_count": 2
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:11Z",
+      "latency_ms": 1131,
+      "last_ok": "2026-11-18T09:21:11Z"
     },
     {
       "id": "megavid",
@@ -98,7 +147,10 @@
       "required_id": "anilist",
       "has_dub": true,
       "url": "https://megavid.buzz/ani/{id}/{episode}/{lang}?color=%2306b6d4&autoplay=true&provider=1",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:12Z",
+      "latency_ms": 661,
+      "last_ok": "2026-11-18T09:21:12Z"
     },
     {
       "id": "primesrc_anime",
@@ -106,11 +158,14 @@
       "badge": "Multi-Source",
       "desc": "Multi-Cluster Engine (Filemoon/Voe)",
       "domain": "primesrc.me",
-      "enabled": false,
+      "enabled": true,
       "required_id": "tmdb",
       "has_dub": false,
       "url": "https://primesrc.me/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}",
-      "fail_count": 2
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:12Z",
+      "latency_ms": 817,
+      "last_ok": "2026-11-18T09:21:12Z"
     },
     {
       "id": "vidsrc_anime",
@@ -122,14 +177,21 @@
       "required_id": "tmdb",
       "has_dub": false,
       "url": "https://vidprime.top/embed/tv/{tmdb_id}/{season}/{episode}",
-      "fail_count": 0
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:13Z",
+      "latency_ms": 828,
+      "last_ok": "2026-11-18T09:21:13Z"
     }
   ],
   "ad_whitelist": [
     "2embed",
     "anikoto",
     "anixo.buzz",
+    "aoneroom.com",
+    "api6.aoneroom.com",
     "filemoon.sx",
+    "hakunaymatata.com",
+    "inmoviebox.com",
     "megavid.buzz",
     "primesrc.me",
     "streamtape.com",
