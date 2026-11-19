@@ -109,20 +109,6 @@
   ],
   "anime_servers": [
     {
-      "id": "moviebox",
-      "name": "MovieBox Anime",
-      "badge": "Multi-Audio",
-      "desc": "Direct CDN Anime with Dubs & High-Speed Streams",
-      "domain": "api6.aoneroom.com",
-      "enabled": true,
-      "direct_cdn": true,
-      "has_dub": true,
-      "fail_count": 0,
-      "last_checked": "2026-11-18T09:21:10Z",
-      "latency_ms": 815,
-      "last_ok": "2026-11-18T09:21:10Z"
-    },
-    {
       "id": "anixo",
       "name": "AniXo",
       "badge": "Sub & Dub",
@@ -181,6 +167,20 @@
       "last_checked": "2026-11-18T09:21:13Z",
       "latency_ms": 828,
       "last_ok": "2026-11-18T09:21:13Z"
+    },
+    {
+      "id": "moviebox",
+      "name": "MovieBox Anime",
+      "badge": "Direct CDN",
+      "desc": "Direct CDN Anime with Dubs & High-Speed Streams",
+      "domain": "api6.aoneroom.com",
+      "enabled": true,
+      "direct_cdn": true,
+      "has_dub": true,
+      "fail_count": 0,
+      "last_checked": "2026-11-18T09:21:10Z",
+      "latency_ms": 815,
+      "last_ok": "2026-11-18T09:21:10Z"
     }
   ],
   "ad_whitelist": [
